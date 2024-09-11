@@ -1,10 +1,10 @@
-module.exports = {
-  async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: 'http://localhost:5001/api/:path*', // Let op de nieuwe poort: 5001
-      },
-    ]
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: true,
+  env: {
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL,
   },
+  // ... andere configuraties ...
 }
+
+module.exports = nextConfig

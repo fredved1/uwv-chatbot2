@@ -69,6 +69,16 @@ export default function UWVChatbot({
     scrollToBottom()
   }, [messages, scrollToBottom])
 
+  const handleSendMessage = async (message: string) => {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message })
+    });
+    const data = await response.json();
+    return data.response;
+  }
+
   const handleSend = async () => {
     if (input.trim() === '') return
 
@@ -77,7 +87,7 @@ export default function UWVChatbot({
     setInput('')
 
     try {
-      const response = await onSendMessage(input)
+      const response = await handleSendMessage(input);
       setMessages(prev => [...prev, { role: 'assistant', content: response }])
     } catch (error) {
       console.error('Error sending message:', error)
