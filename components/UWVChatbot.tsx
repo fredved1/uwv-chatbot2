@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import Image from 'next/image'
 import { Loader2, Send, RefreshCw, Trash2 } from "lucide-react"
 
@@ -28,30 +28,39 @@ export default function UWVChatbot({
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [models, setModels] = useState<string[]>([])
-  const [selectedModel, setSelectedModel] = useState<string>('')
+  // Verwijder de selectedModel state als deze niet wordt gebruikt
   const messagesEndRef = useRef<HTMLDivElement>(null)
+
   const handleClearMemory = async () => {
     await onClearMemory();
     setMessages([]);
   }
   
-  useEffect(() => {
-    startNewConversation()
-    fetchAvailableModels()
-  }, [])
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  const fetchAvailableModels = async () => {
+  const fetchAvailableModels = useCallback(async () => {
     const availableModels = await onGetAvailableModels()
     setModels(availableModels)
     if (availableModels.length > 0) {
-      setSelectedModel(availableModels[0])
       onSelectModel(availableModels[0])
     }
-  }
+  }, [onGetAvailableModels, onSelectModel])
+
+  const startNewConversation = useCallback(async () => {
+    setIsLoading(true)
+    try {
+      const openingMessage = await onStartNewConversation()
+      setMessages([{ role: 'assistant', content: openingMessage }])
+    } catch (error) {
+      console.error('Error starting new conversation:', error)
+      setMessages([{ role: 'assistant', content: 'Sorry, er is een fout opgetreden bij het starten van een nieuwe conversatie.' }])
+    } finally {
+      setIsLoading(false)
+    }
+  }, [onStartNewConversation])
+
+  useEffect(() => {
+    startNewConversation()
+    fetchAvailableModels()
+  }, [startNewConversation, fetchAvailableModels])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
@@ -70,19 +79,6 @@ export default function UWVChatbot({
     } catch (error) {
       console.error('Error sending message:', error)
       setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, er is een fout opgetreden.' }])
-    } finally {
-      setIsLoading(false)
-    }
-  }
-
-  const startNewConversation = async () => {
-    setIsLoading(true)
-    try {
-      const openingMessage = await onStartNewConversation()
-      setMessages([{ role: 'assistant', content: openingMessage }])
-    } catch (error) {
-      console.error('Error starting new conversation:', error)
-      setMessages([{ role: 'assistant', content: 'Sorry, er is een fout opgetreden bij het starten van een nieuwe conversatie.' }])
     } finally {
       setIsLoading(false)
     }
@@ -132,7 +128,6 @@ export default function UWVChatbot({
             <select
               className="w-[180px] bg-white border border-uwv-blue text-uwv-blue rounded-md p-2"
               onChange={(e) => {
-                setSelectedModel(e.target.value)
                 onSelectModel(e.target.value)
               }}
             >

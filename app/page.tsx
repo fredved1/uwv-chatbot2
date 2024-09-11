@@ -1,13 +1,13 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useCallback } from 'react'
 import UWVChatbot from '../components/UWVChatbot'
 
 const API_BASE_URL = 'http://localhost:3000/api';
 
 export default function Home() {
-  const [selectedModel, setSelectedModel] = useState<string>('')
-
+  // Verwijder de selectedModel state als deze niet wordt gebruikt
+  
   const handleSendMessage = useCallback(async (message: string) => {
     try {
       const response = await fetch(`${API_BASE_URL}/send-message`, {
@@ -59,7 +59,6 @@ export default function Home() {
   }, [])
 
   const handleSelectModel = useCallback((model: string) => {
-    setSelectedModel(model);
     fetch(`${API_BASE_URL}/select-model`, {
       method: 'POST',
       headers: {
