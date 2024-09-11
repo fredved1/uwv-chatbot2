@@ -28,7 +28,6 @@ export default function UWVChatbot({
   const [input, setInput] = useState('')
   const [isLoading, setIsLoading] = useState(false)
   const [models, setModels] = useState<string[]>([])
-  // Verwijder de selectedModel state als deze niet wordt gebruikt
   const messagesEndRef = useRef<HTMLDivElement>(null)
 
   const handleClearMemory = async () => {
@@ -62,9 +61,13 @@ export default function UWVChatbot({
     fetchAvailableModels()
   }, [startNewConversation, fetchAvailableModels])
 
-  const scrollToBottom = () => {
+  const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }
+  }, [])
+
+  useEffect(() => {
+    scrollToBottom()
+  }, [messages, scrollToBottom])
 
   const handleSend = async () => {
     if (input.trim() === '') return
